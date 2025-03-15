@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Application</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&family=Poppins:wght@400;500;600&family=Open+Sans:wght@600&family=Lato:wght@400&family=Montserrat:wght@600&family=Quicksand:wght@500&family=Oswald:wght@700&family=Bebas+Neue&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="clock" id="clock">00:00:00</div>
+            <div class="greeting" id="greeting">Good Morning, User!</div>
+        </header>
+        <!-- Main Content Section -->
+        <main>
+            <div class="task-container" id="task-container">
+                <!-- Task cards will be dynamically inserted here -->
+            </div>
+            <!-- Pagination Controls -->
+            <div class="pagination" id="pagination">
+                <button class="prev-page" id="prev-page">Previous</button>
+                <span class="page-info" id="page-info">Page 1 of 1</span>
+                <button class="next-page" id="next-page">Next</button>
+            </div>
+        </main>
+        <!-- Add Task Button -->
+        <button class="add-task-button" id="add-task-button">+</button>
+        <!-- Add Task Modal -->
+        <div class="modal" id="add-task-modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-button">&times;</span>
+                <h2>Add New Task</h2>
+                <form id="task-form">
+                    <label for="task-name">Task Name:</label>
+                    <input type="text" id="task-name" name="task-name" required>
+                    <label for="task-deadline">Task Deadline:</label>
+                    <input type="datetime-local" id="task-deadline" name="task-deadline" required>
+                    <button type="submit">Add Task</button>
+                </form>
+            </div>
+        </div>
+        <!-- Background Image -->
+        <div class="background-image" id="background-image"></div>
+        <script src="script.js"></script>
+    </div>
+</body>
+
+</html>
