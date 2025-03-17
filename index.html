@@ -13,10 +13,24 @@
 
 <body>
     <div class="container">
+
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-content">
+                <h1 id="welcome-greeting">Good morning!</h1>
+                <p>Please enter your name to continue</p>
+                <input type="text" id="user-name-input" placeholder="Your name">
+                <button id="continue-button">Continue</button>
+            </div>
+        </div>
         <!-- Header Section -->
         <header>
-            <div class="clock" id="clock">00:00:00</div>
+            <div class="clock-container">
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="date" id="date">Sunday, January 1, 2023</div>
+            </div>
             <div class="greeting" id="greeting">Good Morning, User!</div>
+
         </header>
         <!-- Main Content Section -->
         <main>
