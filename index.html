@@ -38,11 +38,11 @@
                 <!-- Task cards will be dynamically inserted here -->
             </div>
             <!-- Pagination Controls -->
-            <div class="pagination" id="pagination">
+            <!-- <div class="pagination" id="pagination">
                 <button class="prev-page" id="prev-page">Previous</button>
                 <span class="page-info" id="page-info">Page 1 of 1</span>
                 <button class="next-page" id="next-page">Next</button>
-            </div>
+            </div> -->
         </main>
         <!-- Add Task Button -->
         <button class="add-task-button" id="add-task-button">+</button>
@@ -62,8 +62,15 @@
         </div>
         <!-- Background Image -->
         <div class="background-image" id="background-image"></div>
-        <script src="script.js"></script>
+
+        <div class="task-counts">
+            <p>Completed: <span id="completed-count">0</span></p>
+            <p>Incomplete: <span id="incomplete-count">0</span></p>
+        </div>
+
     </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>

@@ -49,8 +49,6 @@ userNameInput.addEventListener('keypress', (event) => {
 // Initially show the welcome screen
 welcomeScreen.style.display = 'flex';
 
-
-
 // Function to update the clock and date
 function updateClock() {
     // Get current date and time
@@ -87,9 +85,15 @@ updateClock();
 // Update the clock every second (1000 milliseconds)
 setInterval(updateClock, 1000);
 
+
 /**
  * Creating the task and setting the deadline
  */
+
+// Global tasks array
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+// Generate unique ID for tasks
 
 // DOM Elements
 const addTaskButton = document.getElementById('add-task-button');
@@ -116,44 +120,39 @@ window.addEventListener('click', (event) => {
 });
 
 // Function to create a task card
-function createTaskCard(taskName, deadline) {
+function createTaskCard(task) {
     const taskCard = document.createElement('div');
     taskCard.className = 'task-card';
-
-    // Parse deadline date
-    const deadlineDate = new Date(deadline);
-
-    // Create countdown timer
-    function updateCountdown() {
-        const now = new Date();
-        const timeRemaining = deadlineDate - now;
-
-        if (timeRemaining <= 0) {
-            taskCard.querySelector('.countdown').textContent = 'Time\'s up!';
-            return;
-        }
-
-        const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-
-        taskCard.querySelector('.countdown').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
+    taskCard.dataset.id = task.id;
 
     // Create task card HTML
     taskCard.innerHTML = `
-    <div class="countdown">--:--:--:--</div>
-    <h3 class="task-name">${taskName}</h3>
-    <p class="task-deadline">Deadline: ${formatDate(deadlineDate)}</p>
-  `;
+        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+        <div class="countdown">--:--:--:--</div>
+        <h3 class="task-name">${task.name}</h3>
+        <p class="task-deadline">Deadline: ${formatDate(new Date(task.deadline))}</p>
+        <button class="delete-task">Delete</button>
+    `;
 
-    // Update countdown immediately and every second
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    // Add event listeners
+    taskCard.querySelector('.task-checkbox').addEventListener('change', () => {
+        toggleTaskCompletion(task.id);
+    });
+
+    taskCard.querySelector('.delete-task').addEventListener('click', () => {
+        deleteTask(task.id);
+    });
+
+    // Update countdown
+    updateCountdown(taskCard, task.deadline);
 
     return taskCard;
 }
+
+function generateTaskId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
 
 // Function to format date
 function formatDate(date) {
@@ -168,6 +167,29 @@ function padZero(num) {
     return num.toString().padStart(2, '0');
 }
 
+// Function to update countdown timer
+function updateCountdown(taskCard, deadline) {
+    function update() {
+        const now = new Date();
+        const timeRemaining = new Date(deadline) - now;
+
+        if (timeRemaining <= 0) {
+            taskCard.querySelector('.countdown').textContent = 'Time\'s up!';
+            return;
+        }
+
+        const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        taskCard.querySelector('.countdown').textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    update();
+    setInterval(update, 1000);
+}
+
 // Handle form submission
 taskForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -176,16 +198,108 @@ taskForm.addEventListener('submit', (event) => {
     const deadline = document.getElementById('task-deadline').value;
 
     if (taskName && deadline) {
-        // Create new task card
-        const taskCard = createTaskCard(taskName, deadline);
+        const newTask = {
+            id: generateTaskId(),
+            name: taskName,
+            deadline: deadline,
+            completed: false
+        };
 
-        // Add task card to container
+        tasks.push(newTask);
+        const taskCard = createTaskCard(newTask);
         taskContainer.appendChild(taskCard);
 
-        // Reset form
         taskForm.reset();
-
-        // Close modal
         modal.style.display = 'none';
+
+        updateTaskCounts();
+        saveTasksToLocalStorage();
     }
+});
+
+// Function to toggle task completion status
+function toggleTaskCompletion(taskId) {
+    for (const task of tasks) {
+        if (task.id === taskId) {
+            task.completed = !task.completed;
+            break;
+        }
+    }
+    updateTaskCounts();
+    saveTasksToLocalStorage();
+
+    const taskCard = document.querySelector(`.task-card[data-id="${taskId}"]`);
+    if (taskCard) {
+        if (tasks.find(t => t.id === taskId).completed) {
+            taskCard.classList.add('completed');
+        } else {
+            taskCard.classList.remove('completed');
+        }
+    }
+}
+
+// Function to delete a task
+function deleteTask(taskId) {
+    tasks = tasks.filter(task => task.id !== taskId);
+
+    const taskCards = document.querySelectorAll('.task-card');
+    for (const card of taskCards) {
+        if (card.dataset.id === taskId) {
+            card.remove();
+            break;
+        }
+    }
+
+    updateTaskCounts();
+    saveTasksToLocalStorage();
+}
+
+// Function to update task counts
+function updateTaskCounts() {
+    let completedCount = 0;
+    let incompleteCount = 0;
+
+    for (const task of tasks) {
+        if (task.completed) {
+            completedCount++;
+        } else {
+            incompleteCount++;
+        }
+    }
+
+    document.getElementById('completed-count').textContent = completedCount;
+    document.getElementById('incomplete-count').textContent = incompleteCount;
+}
+
+// Function to save tasks to localStorage
+function saveTasksToLocalStorage() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    // Demonstrate a loop with array manipulation
+    const taskSummaries = [];
+    for (let i = 0; i < tasks.length; i++) {
+        taskSummaries.push({
+            name: tasks[i].name,
+            deadline: tasks[i].deadline,
+            completed: tasks[i].completed
+        });
+    }
+}
+
+// Load tasks when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        const taskCard = createTaskCard(task);
+        taskContainer.appendChild(taskCard);
+    }
+
+    tasks.forEach(task => {
+        const taskCard = document.querySelector(`.task-card[data-id="${task.id}"]`);
+        if (taskCard) {
+            updateCountdown(taskCard, task.deadline);
+        }
+    });
+
+    updateTaskCounts();
 });
